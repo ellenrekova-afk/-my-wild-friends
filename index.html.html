@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#083d76">
+<title>My Wild Friends 🐧</title>
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyo1VfYsqSwT4bY=" crossorigin="">
+<style>
+:root{--ink:#123455;--sky:#e7f6ff;--blue:#2479d2;--deep:#073b70;--mint:#c2f7f5;--pale:#f3fbff;--line:#cee3f3}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:linear-gradient(170deg,#dff5ff,#eef8ff 45%,#dcf6fb);color:var(--ink);min-height:100vh;padding-bottom:44px}
+header{background:linear-gradient(120deg,#073b70,#237bcf 63%,#61c8e7);padding:32px 20px 30px;color:white;border-radius:0 0 34px 34px;box-shadow:0 12px 25px #09407728}
+.wrap{max-width:720px;margin:auto;padding:0 17px}
+.eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:800;color:#d9ffff}
+h1{font-size:clamp(29px,8vw,42px);line-height:1.08;letter-spacing:-1px;margin:8px 0}
+header p{margin:5px 0 0;color:#e5f6ff}
+.tag{display:inline-block;border:1px solid #9ee7ff9b;border-radius:30px;font-size:12px;padding:4px 10px;background:#ffffff21;margin-top:14px}
+main{max-width:720px;margin:20px auto;padding:0 17px}
+.card{border-radius:25px;background:#fff;box-shadow:0 10px 24px #174e7b13;padding:22px;margin:15px 0}
+.card.soft{background:#f6fcff;border:1px solid #d7ebf8}
+h2{font-size:20px;margin:0 0 10px}p{margin:9px 0}small,.muted{color:#55718b}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border:0;border-radius:15px;padding:11px 16px;font:700 15px inherit;font-family:inherit;font-size:15px;font-weight:750;text-decoration:none;cursor:pointer;background:var(--blue);color:white}
+.btn.secondary{background:#eaf5ff;color:#155994}.btn:disabled{opacity:.45}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+#file{display:none}
+.notice{padding:13px 14px;border-radius:14px;background:#e9f7fe;border:1px solid #bddfee;font-size:14px}
+#status{font-size:14px;margin-top:10px;white-space:pre-wrap}
+.ok{color:#076a50}.err{color:#a11b3b}
+#animals{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.animal{border:1px solid #d5e6f5;background:#f7fbff;border-radius:17px;padding:14px;text-align:left;cursor:pointer;color:inherit;font:inherit}
+.animal.selected{border:2px solid #2785da;padding:13px;background:#edf8ff}
+.animal .top{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.animal strong{font-size:17px}.animal small{display:block;margin-top:3px}
+.heart{color:#db557e;font-size:22px}
+#map{height:355px;border-radius:17px;overflow:hidden;background:#d1eaf5;z-index:0;margin-top:14px}
+@media(min-width:640px){#map{height:450px}}
+.field{display:block;margin:12px 0 6px;font-weight:700}
+input[type=text]{width:100%;border:1px solid #bfd9ec;border-radius:13px;font-size:16px;padding:12px 14px;color:var(--ink);background:#fff}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.stat{background:#eaf6ff;border-radius:12px;padding:9px 12px;font-size:13px}
+.stat b{display:block;font-size:18px}
+.hidden{display:none!important}
+.foot{font-size:12px;line-height:1.6;padding:12px 4px;color:#4b6983}
+a{color:#075eb4}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="eyebrow">🌊 Moje malá oceánská výprava</div><h1>🐧 My Wild Friends</h1><p>Skuteční tučňáci. Skutečné vědecké trasy. Tvoje vlastní jména.</p><div class="tag">💙 Nezobrazuje živé GPS — jen naměřenou historii</div></div></header>
+<main>
+ <section class="card" id="importCard">
+  <h2>🛰️ Přidej skutečné GPS trasy</h2>
+  <p>Načti vědecký soubor CSV s GPS polohami tučňáků. Zobrazí se jednotlivá zvířata i jejich skutečné zaznamenané cesty.</p>
+  <div class="actions">
+   <label class="btn" for="file">📂 Vybrat GPS soubor</label><input type="file" id="file" accept=".csv,.txt,text/csv,text/plain">
+   <a class="btn secondary" href="https://doi.org/10.5441/001/1.725" target="_blank" rel="noopener">🔬 Vědecká data</a>
+  </div>
+  <p class="notice">Hledej soubor <b>Humboldt penguin GPS tracking 2022 (Hourly averages).csv</b>. Na webu Movebank je k dispozici studie z roku 2022. Při použití respektuj licenci CC BY-NC 4.0.</p>
+  <div id="status" role="status"></div>
+ </section>
+ <section class="card hidden" id="zooCard">
+  <h2>💙 Tvoji tučňáci</h2>
+  <div class="stats"><div class="stat"><b id="count">0</b>tučňáků v souboru</div><div class="stat"><b id="locations">0</b>GPS bodů</div></div>
+  <div id="animals"></div>
+ </section>
+ <section class="card hidden" id="detailCard">
+  <h2 id="detailName">🐧 Tučňák</h2>
+  <p class="muted" id="detailInfo"></p>
+  <label class="field" for="nickname">Jak mu budeš říkat?</label>
+  <input type="text" id="nickname" maxlength="40" placeholder="Třeba Chocholka ✨">
+  <div class="actions"><button id="save" class="btn">💙 Uložit jméno</button><button id="fave" class="btn secondary">☆ Přidat mezi oblíbené</button></div>
+  <h2 style="margin-top:23px">🗺️ Jeho GPS trasa</h2>
+  <p class="muted" id="dates"></p>
+  <div id="map" role="region" aria-label="Mapa historické trasy tučňáka"></div>
+  <p class="muted" style="font-size:13px">🔵 Čára spojuje zaznamenané GPS polohy podle času. Nezobrazuje živý pohyb. Mezi měřeními neznáme přesnou trasu.</p>
+ </section>
+ <section class="card soft" id="emptyCard">
+  <h2>🐧 Chocholka už čeká!</h2>
+  <p>Jakmile nahraješ GPS soubor, můžeš si vybrat skutečného tučňáka a dát mu přezdívku <b>Chocholka ✨</b> nebo jakékoli jiné jméno.</p>
+  <p class="muted">Žádné falešné body na mapě nepřidáváme.</p>
+ </section>
+ <p class="foot">Zdroj zamýšlených dat: Bastías I., Mattern T., Ellenberg U., Daigre M. & Simeone A. (2026), <i>Data from: Spatio-temporal overlap between purse seine fisheries and Humboldt penguin feeding areas in northern Chile</i>, Movebank Data Repository, <a href="https://doi.org/10.5441/001/1.725">doi:10.5441/001/1.725</a>. Licence zveřejněných dat: <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Data se ukládají jen ve tvém prohlížeči; nic se nikam neposílá.</p>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function(){
+ "use strict";
+ const $=id=>document.getElementById(id);
+ const saveKey="mwf-penguin-names-v2",dataKey="mwf-penguin-tracks-v2";
+ let names={},animals={},selected=null,map=null,poly=null,startPin=null,endPin=null;
+ try{names=JSON.parse(localStorage.getItem(saveKey)||"{}")}catch(e){}
+ function status(message,error){$("status").textContent=message;$("status").className=error?"err":"ok";}
+ function parseCSV(str){
+   str=str.replace(/^\uFEFF/,"");
+   const first=str.split(/\r?\n/,1)[0]; let sep=",";
+   if((first.match(/\t/g)||[]).length>(first.match(/,/g)||[]).length)sep="\t";
+   else if((first.match(/;/g)||[]).length>(first.match(/,/g)||[]).length)sep=";";
+   let out=[],row=[],cell="",quoted=false;
+   for(let i=0;i<str.length;i++){
+     let c=str[i];
+     if(c==='"'){if(quoted&&str[i+1]==='"'){cell+='"';i++}else quoted=!quoted;}
+     else if(c===sep&&!quoted){row.push(cell);cell="";}
+     else if((c==="\n"||c==="\r")&&!quoted){if(c==="\r"&&str[i+1]==="\n")i++;row.push(cell);if(row.some(x=>x.trim()!==""))out.push(row);row=[];cell="";}
+     else cell+=c;
+   }
+   if(cell!==""||row.length){row.push(cell);out.push(row);}
+   return out;
+ }
+ const norm=x=>(x||"").toLowerCase().trim().replace(/[\s_]+/g,"-").replace(/[()]/g,"");
+ function parseDate(s){if(!s)return null;let d=new Date(s);if(!isNaN(d))return d.toISOString(); d=new Date(String(s).replace(" ","T")+"Z");return isNaN(d)?null:d.toISOString();}
+ function consume(content){
+   const rows=parseCSV(content);
+   if(rows.length<2)throw Error("Soubor neobsahuje řádky s polohami.");
+   const h=rows[0].map(norm);
+   const col=(...words)=>h.findIndex(x=>words.includes(x));
+   let lat=col("location-lat","latitude","lat","location-latitude","decimal-latitude","y");
+   let lng=col("location-long","longitude","lon","lng","long","location-longitude","decimal-longitude","x");
+   let id=col("individual-local-identifier","individual-local-id","individual-id","animal-id","tag-local-identifier","individual-identifier","id","animal","penguin");
+   let ts=col("timestamp","time","datetime","date-time","event-date","date");
+   if(lat<0||lng<0)throw Error("V CSV chybí sloupce se zeměpisnou šířkou a délkou (location-lat / location-long). Zkontroluj, že jde o soubor GPS tracking, ne reference-data.");
+   const result={};let valid=0;
+   for(let i=1;i<rows.length;i++){
+     const r=rows[i],y=Number((r[lat]||"").trim().replace(",",".")),x=Number((r[lng]||"").trim().replace(","));
+     if(!Number.isFinite(x)||!Number.isFinite(y)||Math.abs(y)>90||Math.abs(x)>180||(!x&&!y))continue;
+     let key=(id>=0?r[id]:"Tučňák 1")||"Tučňák 1";key=String(key).trim();
+     if(!result[key])result[key]=[];
+     result[key].push([y,x,ts>=0?parseDate(r[ts]):null]);valid++;
+   }
+   if(!valid)throw Error("Soubor neobsahuje platné GPS souřadnice.");
+   for(let k of Object.keys(result))result[k].sort((a,b)=>!a[2]||!b[2]?0:a[2].localeCompare(b[2]));
+   return result;
+ }
+ function store(){
+   try{localStorage.setItem(dataKey,JSON.stringify(animals));return true}
+   catch(e){status("GPS data se zobrazují, ale nevešla se do paměti prohlížeče. Po obnovení stránky možná bude potřeba CSV načíst znovu.",true);return false;}
+ }
+ function persistNames(){try{localStorage.setItem(saveKey,JSON.stringify(names))}catch(e){}}
+ function render(){
+   const ids=Object.keys(animals);
+   $("zooCard").classList.toggle("hidden",!ids.length);$("emptyCard").classList.toggle("hidden",!!ids.length);
+   $("count").textContent=ids.length;$("locations").textContent=ids.reduce((sum,id)=>sum+animals[id].length,0).toLocaleString("cs-CZ");
+   $("animals").replaceChildren();
+   ids.sort((a,b)=>Number(!!names[b]?.fav)-Number(!!names[a]?.fav)||a.localeCompare(b,"cs"));
+   ids.forEach(id=>{
+     let btn=document.createElement("button");btn.className="animal"+(selected===id?" selected":"");
+     let top=document.createElement("div");top.className="top";
+     let strong=document.createElement("strong");strong.textContent="🐧 "+(names[id]?.name||id);
+     let heart=document.createElement("span");heart.className="heart";heart.textContent=names[id]?.fav?"♥":"♡";
+     let small=document.createElement("small");small.textContent="ID: "+id+" · "+animals[id].length+" GPS bodů";
+     top.append(strong,heart);btn.append(top,small);btn.onclick=()=>choose(id);
+     $("animals").append(btn);
+   });
+ }
+ function choose(id){
+   selected=id;render();$("detailCard").classList.remove("hidden");
+   $("detailName").textContent="🐧 "+(names[id]?.name||id);
+   $("detailInfo").textContent="Skutečný vědecký identifikátor: "+id;
+   $("nickname").value=names[id]?.name||"";
+   $("fave").textContent=names[id]?.fav?"⭐ Odebrat z oblíbených":"☆ Přidat mezi oblíbené";
+   const p=animals[id],dates=p.filter(x=>x[2]).map(x=>x[2]);
+   $("dates").textContent=dates.length?("Historická měření: "+new Date(dates[0]).toLocaleDateString("cs-CZ")+" – "+new Date(dates[dates.length-1]).toLocaleDateString("cs-CZ")):"Historická měření (v souboru chybí časové údaje).";
+   if(typeof L==="undefined"){status("Mapový podklad se nenačetl. Zkontroluj připojení k internetu.",true);return;}
+   if(!map){
+     map=L.map("map",{scrollWheelZoom:false}).setView([-29.25,-71.55],10);
+     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap contributors"}).addTo(map);
+   }
+   if(poly)map.removeLayer(poly);if(startPin)map.removeLayer(startPin);if(endPin)map.removeLayer(endPin);
+   const pts=p.map(x=>[x[0],x[1]]);poly=L.polyline(pts,{color:"#117cde",weight:4,opacity:.87}).addTo(map);
+   startPin=L.circleMarker(pts[0],{radius:7,color:"#fff",weight:2,fillColor:"#20a582",fillOpacity:1}).addTo(map).bindPopup("První zaznamenaná poloha"+(p[0][2]?"<br>"+new Date(p[0][2]).toLocaleString("cs-CZ"):""));
+   let last=p[p.length-1];endPin=L.circleMarker(pts[pts.length-1],{radius:8,color:"#fff",weight:2,fillColor:"#f17843",fillOpacity:1}).addTo(map).bindPopup("Poslední zaznamenaná poloha"+(last[2]?"<br>"+new Date(last[2]).toLocaleString("cs-CZ"):""));
+   map.fitBounds(poly.getBounds().pad(.25),{maxZoom:13});
+   setTimeout(()=>map.invalidateSize(),100);
+   $("detailCard").scrollIntoView({behavior:"smooth",block:"start"});
+ }
+ $("file").addEventListener("change",async function(){
+   const f=this.files?.[0];if(!f)return;
+   status("Načítám GPS souřadnice…");
+   try{animals=consume(await f.text());selected=null;store();render();status("✅ Načteno! Vyber si tučňáka níže.");const first=Object.keys(animals)[0];if(first)choose(first);}
+   catch(e){status("❌ "+e.message,true);}
+   this.value="";
+ });
+ $("save").onclick=()=>{
+   if(!selected)return;
+   names[selected]={...(names[selected]||{}),name:$("nickname").value.trim().slice(0,40)};
+   persistNames();choose(selected);
+ };
+ $("fave").onclick=()=>{if(!selected)return;names[selected]={...(names[selected]||{}),fav:!names[selected]?.fav};persistNames();choose(selected)};
+ try{const prev=localStorage.getItem(dataKey);if(prev){animals=JSON.parse(prev);render();status("✅ Dříve načtené GPS trasy jsou připravené.");}}catch(e){}
+})();
+</script>
+</body>
+</html>
