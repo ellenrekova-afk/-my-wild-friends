@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Wild Friends 🐧</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#eaf7ff;color:#123d68}
+header{background:linear-gradient(120deg,#0077d9,#52c8f5);color:white;text-align:center;padding:35px 15px;border-radius:0 0 30px 30px}
+h1{margin:0;font-size:30px}
+main{padding:18px;max-width:600px;margin:auto}
+.card{background:white;border-radius:22px;padding:20px;margin:18px 0;box-shadow:0 5px 18px #1678aa22}
+.penguin{font-size:70px;text-align:center}
+button{background:#087bd8;color:white;border:0;border-radius:13px;padding:13px;margin:5px 0;font-weight:bold;cursor:pointer}
+input{padding:12px;border:1px solid #b7d9ef;border-radius:12px;width:90%;font-size:16px}
+.map{height:300px;border-radius:18px;overflow:hidden}
+iframe{width:100%;height:100%;border:0}
+small{color:#52738e}
+</style>
+</head>
+<body>
+<header>
+<h1>🐧 My Wild Friends</h1>
+<p>My little penguin adventure 💙</p>
+</header>
+<main>
+<div class="card">
+<div class="penguin">🐧</div>
+<h2>Meet your penguin!</h2>
+<p>Species: Adélie penguin</p>
+<p>Home: Antarctica ❄️</p>
+<input id="name" placeholder="Give your penguin a name">
+<button onclick="saveName()">💙 Save name</button>
+<button onclick="favorite()">⭐ Favorite</button>
+<p id="message"></p>
+</div>
+<div class="card">
+<h2>🗺️ Penguin map</h2>
+<div class="map">
+<iframe title="Antarctica map" src="https://www.openstreetmap.org/export/embed.html?bbox=-75%2C-79%2C75%2C-58&layer=mapnik"></iframe>
+</div>
+<p><small>Map of Antarctica. This is not live GPS tracking.</small></p>
+<a href="https://www.movebank.org/" target="_blank" rel="noopener">🌍 Explore real animal tracking data</a>
+</div>
+</main>
+<script>
+const input=document.getElementById("name");
+const msg=document.getElementById("message");
+input.value=localStorage.getItem("penguinName")||"";
+function saveName(){
+const name=input.value.trim();
+if(!name)return;
+localStorage.setItem("penguinName",name);
+msg.textContent="Hello, "+name+"! 🐧💙";
+}
+function favorite(){
+const name=input.value.trim()||"Your penguin";
+localStorage.setItem("favoritePenguin","yes");
+msg.textContent="⭐ "+name+" is your favorite!";
+}
+</script>
+</body>
+</html>
