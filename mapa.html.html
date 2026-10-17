@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#088ad4">
+<title>My Wild Friends 🐧</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyo8AmqGwFYEz3iG4=" crossorigin="">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eaf7ff;color:#123f67;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}header{background:linear-gradient(115deg,#0278c9,#04b7dd);text-align:center;color:white;padding:34px 12px 27px;border-radius:0 0 28px 28px}header h1{margin:0;font-size:30px}header p{margin:9px 0 0;font-size:15px;opacity:.95}.wrap{width:min(580px,100%);margin:auto;padding:16px 14px 40px}.card{background:white;border-radius:22px;margin:0 0 17px;padding:22px 20px;box-shadow:0 8px 26px rgba(16,86,123,.07)}.hero{display:flex;align-items:center;gap:17px}.penguin{font-size:62px;line-height:1}.hero h2{margin:0 0 7px;font-size:22px}.hero p{margin:0;color:#557998;font-size:14px}label{font-size:13px;display:block;font-weight:700;margin:18px 0 7px}.inputrow{display:flex;gap:8px}.inputrow input{min-width:0;flex:1;width:100%;font-size:16px;padding:12px;border:1px solid #bcdff7;border-radius:12px;color:#133f67}.btn{font-size:14px;font-weight:700;white-space:nowrap;color:white;background:#0786db;border:0;padding:11px 15px;border-radius:12px}.subbtn{background:#e6f4ff;color:#0865ad}.actions{display:flex;gap:9px;margin-top:11px}.actions button{flex:1}.note{font-size:13px;line-height:1.5;color:#5e7d92}.maphead{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap}.maphead h2{margin:0;font-size:21px}.archive{background:#e7f2ff;color:#086db3;border-radius:30px;font-size:11px;padding:7px 9px;font-weight:800}#map{height:390px;width:100%;margin:16px 0 10px;border-radius:18px;background:#d7edf7;overflow:hidden}#status{font-size:13px;line-height:1.5;padding:7px 0;color:#51728d}#progresswrap{display:none}#progress{width:100%;accent-color:#008cdf;cursor:pointer;margin:8px 0}.barrow{display:flex;gap:10px;align-items:center;justify-content:space-between}.barrow .btn{padding:10px 15px}.point{font-size:13px;color:#547590;flex:1;text-align:right}.details{border-top:1px solid #e3f0fa;margin-top:16px;padding-top:12px;font-size:13px;line-height:1.7;color:#375b79}.footer{font-size:12px;line-height:1.6;color:#6c8699;padding:0 8px}.footer a{color:#037ecb}.penguin-pin{font-size:25px;background:#0789e9;border:3px solid #fff;width:43px;height:43px;line-height:37px;border-radius:50% 50% 50% 10%;transform:rotate(-45deg);box-shadow:0 2px 12px #02578b77;text-align:center}.penguin-pin span{display:inline-block;transform:rotate(45deg)}.leaflet-container{font-family:inherit}.error{color:#af3851!important}button:focus-visible,a:focus-visible{outline:3px solid #6ec8ff;outline-offset:2px}
+</style>
+</head>
+<body>
+<header><h1>🐧 My Wild Friends</h1><p>Moje malé dobrodružství s tučňákem 💙</p></header>
+<main class="wrap">
+<section class="card">
+  <div class="hero"><div class="penguin">🐧</div><div><h2 id="hello">Chocholka 💙</h2><p>Tučňák kroužkový (Adélie)<br>Antarktida ❄️</p></div></div>
+  <label for="name">Jak se bude tučňáček jmenovat?</label>
+  <div class="inputrow"><input id="name" aria-label="Přezdívka tučňáka" maxlength="45" placeholder="Např. Chocholka"><button class="btn" id="save">Uložit 💙</button></div>
+  <div class="actions"><button class="btn subbtn" id="favorite">☆ Přidat do oblíbených</button></div>
+</section>
+<section class="card">
+  <div class="maphead"><h2>🗺️ Chocholčina mapa</h2><span class="archive">SKUTEČNÁ HISTORICKÁ DATA</span></div>
+  <p class="note">Modrá značka ukazuje vybraný zaznamenaný bod jednoho skutečně sledovaného tučňáka. Modrá čára spojuje jeho naměřené polohy. Nejde o sledování v reálném čase.</p>
+  <div id="map" aria-label="Mapa skutečných historických poloh tučňáka"></div>
+  <p id="status" role="status">⏳ Načítám skutečné satelitní záznamy…</p>
+  <div id="progresswrap"><label for="progress">Prohlížej Chocholčinu cestu 🐧</label><input id="progress" type="range" min="0" value="0" step="1"><div class="barrow"><button class="btn" id="play">▶ Přehrát cestu</button><span class="point" id="pointinfo"></span></div></div>
+  <div class="details" id="details">Výzkum: Jižní Shetlandy, Antarktický poloostrov, léto 2016–2017.</div>
+  <p class="note">„Chocholka“ je tvoje vlastní přezdívka pro jednoho z výzkumně sledovaných tučňáků, nikoliv jeho oficiální jméno.</p>
+</section>
+<p class="footer">Zdroj: Lowther, Korczak-Abshire, Santos &amp; Oosthuizen – <a href="https://doi.org/10.5281/zenodo.5036339" target="_blank" rel="noopener">otevřená satelitní data tučňáků Adélie (2016–2017)</a>. Zobrazené body jsou stará měření s různou přesností; spojnice neznamená, že známe každou část plavby. Podklad mapy: © OpenStreetMap contributors.</p>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)};
+var chosenName=localStorage.getItem('wildfriends_name')||localStorage.getItem('penguinName')||'Chocholka';
+var favorite=localStorage.getItem('wildfriends_favorite')==='yes';
+function updateName(){ $('name').value=chosenName;$('hello').textContent=chosenName+' 💙'; }
+function updateFavorite(){ $('favorite').textContent=favorite?'★ V oblíbených':'☆ Přidat do oblíbených'; }
+updateName();updateFavorite();
+$('save').addEventListener('click',function(){chosenName=$('name').value.trim()||'Chocholka';localStorage.setItem('wildfriends_name',chosenName);updateName();updateMarker();});
+$('favorite').addEventListener('click',function(){favorite=!favorite;localStorage.setItem('wildfriends_favorite',favorite?'yes':'no');updateFavorite();});
+var map,mapLine,mapMarker,track=[],timer=null,idx=0;
+if(typeof L==='undefined'){$('status').textContent='Mapu se nepodařilo načíst. Zkontroluj připojení k internetu.';return;}
+map=L.map('map',{scrollWheelZoom:false}).setView([-64,-61],4);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap',maxZoom:17}).addTo(map);
+var pin=L.divIcon({className:'',html:'<div class="penguin-pin"><span>🐧</span></div>',iconSize:[43,43],iconAnchor:[21,43]});
+function niceDate(s){var d=new Date(s);return Number.isNaN(d.getTime())?s:d.toLocaleString('cs-CZ',{day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function updateMarker(){if(!track.length)return;var p=track[idx];mapMarker.setLatLng([p.lat,p.lon]).bindPopup('<b>'+escapeHTML(chosenName)+'</b><br>'+escapeHTML(niceDate(p.date))+'<br>Historicky zaznamenaná poloha');$('progress').value=idx;$('pointinfo').textContent=(idx+1)+' / '+track.length;$('details').textContent='Záznam '+(idx+1)+' z '+track.length+' • '+niceDate(p.date)+' (UTC) • Poloha: '+p.lat.toFixed(4)+'°, '+p.lon.toFixed(4)+'° • Výzkumné ID: '+p.id+'.';}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,function(x){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]});}
+function stop(){if(timer){clearInterval(timer);timer=null;}$('play').textContent='▶ Přehrát cestu';}
+$('progress').addEventListener('input',function(){stop();idx=Number(this.value);updateMarker();});
+$('play').addEventListener('click',function(){if(!track.length)return;if(timer){stop();return;}if(idx>=track.length-1)idx=0;$('play').textContent='⏸ Zastavit';timer=setInterval(function(){idx=Math.min(track.length-1,idx+Math.max(1,Math.ceil(track.length/110)));updateMarker();if(idx===track.length-1)stop();},180);});
+var urls=[
+'https://raw.githubusercontent.com/Eden-Eldith/Adelie-dissociative-vector-hypothesis/main/Code/Gps%20tracking/data.csv',
+'https://zenodo.org/records/5036339/files/data.csv?download=1'
+];
+async function loadData(){var lastError;for(var n=0;n<urls.length;n++){try{var r=await fetch(urls[n]);if(!r.ok)throw Error('HTTP '+r.status);var t=await r.text();if(t.length<500)throw Error('Příliš krátká odpověď');return t;}catch(e){lastError=e;}}throw lastError;}
+function parseData(csv){
+ var rows=csv.split(/\r?\n/),fields=rows.shift().replace(/^\uFEFF/,'').split(';').map(function(x){return x.trim().replace(/^"|"$/g,'').toLowerCase();});
+ var index=function(k){return fields.indexOf(k)};var idI=index('id'),latI=index('lat'),lonI=index('lon'),dateI=index('date'),lqI=index('lq');
+ if([idI,latI,lonI,dateI].some(function(x){return x<0;}))throw Error('Neznámý formát dat: '+fields.join(', '));
+ var byId=new Map();
+ for(var i=0;i<rows.length;i++){var c=rows[i].split(';');if(c.length<fields.length)continue;var id=c[idI].trim().replace(/^"|"$/g,''),lat=Number(c[latI].replace(',','.')),lon=Number(c[lonI].replace(',','.')),date=c[dateI].trim().replace(/^"|"$/g,'');
+ if(!id||!date||!Number.isFinite(lat)||!Number.isFinite(lon)||lat> -50||lat< -90||lon< -180||lon>180||(lqI>=0&&c[lqI].trim().replace(/^"|"$/g,'')==='Z'))continue;
+ if(!byId.has(id))byId.set(id,[]);byId.get(id).push({id:id,lat:lat,lon:lon,date:date});
+ }
+ var available=Array.from(byId.values()).filter(function(points){return points.length>=30;});
+ if(!available.length)throw Error('V souboru chybí použitelné body konkrétního tučňáka.');
+ available.sort(function(a,b){return b.length-a.length;});
+ var chosen=available[0];chosen.sort(function(a,b){return new Date(a.date)-new Date(b.date)});
+ // Keep real sampled positions (not interpolated points) while limiting map workload on phones.
+ var max=850,stride=Math.max(1,Math.ceil(chosen.length/max));var sampled=chosen.filter(function(p,i){return i%stride===0||i===chosen.length-1;});
+ return sampled;
+}
+loadData().then(function(csv){
+ track=parseData(csv);
+ var ll=track.map(function(p){return [p.lat,p.lon]});
+ mapLine=L.polyline(ll,{color:'#0088e9',weight:4,opacity:.88}).addTo(map);
+ L.circleMarker(ll[0],{radius:7,color:'#fff',weight:2,fillColor:'#33b37b',fillOpacity:1}).addTo(map).bindPopup('Začátek dostupných měření');
+ L.circleMarker(ll[ll.length-1],{radius:7,color:'#fff',weight:2,fillColor:'#f4aa31',fillOpacity:1}).addTo(map).bindPopup('Konec dostupných měření (historický, ne dnešní)');
+ mapMarker=L.marker(ll[0],{icon:pin,zIndexOffset:900}).addTo(map);
+ map.fitBounds(mapLine.getBounds(),{padding:[28,28],maxZoom:8});
+ $('progresswrap').style.display='block';$('progress').max=String(track.length-1);idx=track.length-1;updateMarker();
+ $('status').textContent='✅ Načteno '+track.length+' skutečných zaznamenaných bodů tučňáka (2016–2017). Modrý tučňák je na posledním dostupném bodě – ne na dnešní poloze.';
+}).catch(function(error){console.error(error);$('status').className='error';$('status').textContent='⚠️ Data se teď nepodařilo načíst. Zkus stránku obnovit při připojení k internetu. Původní výzkumné záznamy jsou dostupné přes odkaz dole.';});
+})();
+</script>
+</body>
+</html>
